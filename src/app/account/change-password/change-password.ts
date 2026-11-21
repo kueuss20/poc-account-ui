@@ -22,45 +22,43 @@ export class ChangePassword {
     minLength(path.newPassword, 8, { message: 'New password must be at least 8 characters long' });
     required(path.confirmPassword, { message: 'Confirm password is required' });
 
-    validateTree(path.newPassword, ({ value, valueOf }) => {
-      const current = valueOf(path.currentPassword);
-      const newPwd = value();
 
+    validateTree(path, ({ valueOf, fieldTree }) => {
+      const current = valueOf(path.currentPassword);
+      const newPwd = valueOf(path.newPassword);
+      const confPwd = valueOf(path.confirmPassword);
+
+       const errors =[];
       if (newPwd && newPwd === current) {
-        return {
+        errors.push({
           kind: 'reused',
           message: 'New password cannot be the same as the current password',
-        };
+          fieldTree: fieldTree.newPassword,
+        });
       }
 
-      return null;
-    });
-
-    required(path.confirmPassword, { message: 'Confirm password is required' });
-
-    validateTree(path.confirmPassword, ({ value, valueOf }) => {
-      const newPassword = valueOf(path.newPassword);
-      const confPwd = value();
-
-      if (newPassword!=='' && confPwd !== newPassword) {
-        return {
+      if (confPwd && confPwd !== newPwd) {
+        errors.push({
           kind: 'mismatch',
           message: 'Confirm password must match new password',
-        };
+          fieldTree: fieldTree.confirmPassword,
+        });
+      }
+
+      if (errors.length > 0) {
+        return errors;
       }
 
       return null;
     });
+
+    
+    
   });
 
    readonly passwordForm = form(this.model, this.changeSchema);
 
-   errorCount=computed(() => {
-    const errors = this.passwordForm.newPassword().errors().length+
-    this.passwordForm.confirmPassword().errors().length+
-    this.passwordForm.currentPassword().errors().length;
-    return errors;
-  });
+   
 
    onSubmit(event: Event) {
     event.preventDefault();

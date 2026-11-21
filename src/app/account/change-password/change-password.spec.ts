@@ -80,4 +80,27 @@ describe('ChangePassword Form Validation', () => {
       .map((error) => error.kind);
     expect(newPasswordKinds).toContain('minLength');
   });
+
+  it('includes child errors in the form errors', async () => {
+    const component = fixture.componentInstance;
+    component.model.set({
+      currentPassword: 'currentPassword',
+      newPassword: 'short',
+      confirmPassword: 'different1234',
+    });
+    await fixture.whenStable();
+    fixture.detectChanges(); // Ensure the component reflects the latest state
+
+    const formErrors = component.passwordForm().errors();
+    const errorSummaries = component.passwordForm().errorSummary();
+    const errorKinds = errorSummaries.flatMap((error) => error.kind);
+    expect(formErrors.length).toBe(0);
+    expect(errorKinds).toContain('minLength');
+    expect(errorKinds).toContain('mismatch');
+    expect(component.passwordForm().errorSummary().length).toBe(
+      component.passwordForm.newPassword().errors().length+
+      component.passwordForm.confirmPassword().errors().length  +
+      component.passwordForm.currentPassword().errors().length
+    );
+  });
 });

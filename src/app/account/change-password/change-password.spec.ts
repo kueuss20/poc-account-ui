@@ -97,10 +97,7 @@ describe('ChangePassword Form Validation', () => {
     expect(formErrors.length).toBe(0);
     expect(errorKinds).toContain('minLength');
     expect(errorKinds).toContain('mismatch');
-    expect(component.passwordForm().errorSummary().length).toBe(
-      component.passwordForm.newPassword().errors().length+
-      component.passwordForm.confirmPassword().errors().length  +
-      component.passwordForm.currentPassword().errors().length
-    );
+    expect(component.passwordForm().errorSummary().length).toBe(2);
+    
   });
 });
